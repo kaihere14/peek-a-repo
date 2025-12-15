@@ -7,7 +7,20 @@ let lastTarget = null;
 
 function createPopup() {
   popup = document.createElement("div");
-  popup.id = "peek-popup";
+
+  popup.className = `
+    fixed z-[9999]
+    w-[480px] h-[320px]
+    p-3
+    rounded-xl
+    bg-[rgba(20,20,30,0.75)]
+    backdrop-blur-md
+    text-white text-xs
+    shadow-2xl
+    overflow-hidden
+    pointer-events-none
+  `;
+
   document.body.appendChild(popup);
 }
 
@@ -68,11 +81,24 @@ async function handleHover(e, link) {
     return;
   }
 
-  popup.innerHTML = `<div class="peek-loading">Loading…</div>`;
+  popup.innerHTML = `
+  <div class="w-full h-full flex items-center justify-center opacity-80">
+    Loading…
+  </div>
+`;
 
   if (isImageFile(href)) {
     const raw = buildRawUrl(href);
-    const html = `<img src="${raw}" class="peek-image" />`;
+    const html = `
+  <div class="w-full h-full flex items-center justify-center">
+    <img
+      src="${raw}"
+      class="max-w-full max-h-full object-contain rounded-lg"
+      loading="lazy"
+    />
+  </div>
+`;
+
     cache.set(href, html);
     popup.innerHTML = html;
     return;
@@ -89,16 +115,32 @@ async function handleHover(e, link) {
   });
 
   if (res?.error === "NO_TOKEN") {
-    popup.innerHTML = `<div class="peek-message">Please set your GitHub token in extension options.</div>`;
+    popup.innerHTML = `
+  <div class="p-3 opacity-80">
+    Please set your GitHub token in extension options.
+  </div>
+`;
+
     return;
   }
 
   if (!res?.content) {
-    popup.innerHTML = `<div class="peek-message">Preview unavailable.</div>`;
+    popup.innerHTML = `<div class="p-3 opacity-85">Preview unavailable.</div>`;
     return;
   }
 
-  const html = `<pre class="peek-code">${highlightCode(res.content)}</pre>`;
+  const html = `
+  <pre class="
+    w-full h-full
+    p-3
+    overflow-hidden
+    font-mono text-[11px] leading-relaxed
+    whitespace-pre-wrap
+  ">
+${highlightCode(res.content)}
+  </pre>
+`;
+
   cache.set(href, html);
   popup.innerHTML = html;
 }
