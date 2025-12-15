@@ -42,7 +42,7 @@ function destroyPopup() {
 }
 
 function isImageFile(path) {
-  return /\.(png|jpe?g|gif|svg)$/i.test(path);
+  return /\.(png|jpe?g|gif|svg|web?p)$/i.test(path);
 }
 
 function getRepoInfo() {
