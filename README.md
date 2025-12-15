@@ -48,6 +48,42 @@ Worth reading the [Wikipedia article](https://wikimediafoundation.org/news/2018/
 
 ---
 
+## Features
+
+- **Hover previews for images**
+
+  - Supports any aspect ratio
+  - Images are scaled intelligently based on total resolution
+  - No scrollbars, no empty space
+
+- **Hover previews for code files**
+
+  - Fetches raw code using GitHub GraphQL API
+  - Syntax highlighting using Prism.js
+  - Only the top part of the file is shown for speed
+
+- **Hover previews for folders**
+
+  - Shows a mini GitHub-style file tree
+  - Folder and file icons using GitHub’s Octicons (Primer)
+  - Scrollable when there are many files
+
+- **Smooth UI**
+
+  - Glassmorphism-style popup
+  - Subtle open/close animations
+  - Popup follows cursor without being intrusive
+
+- **Smart caching**
+
+  - Hovering the same file twice does not re-fetch data
+
+- **Privacy-first**
+  - GitHub token is stored locally using `chrome.storage`
+  - No analytics, no tracking
+
+---
+
 ## How it works
 
 - Hover over a file in a GitHub repository
@@ -57,11 +93,56 @@ Worth reading the [Wikipedia article](https://wikimediafoundation.org/news/2018/
 
 ---
 
+## Setup (for usage)
+
+1. Clone this repository:
+
+   ```bash
+   git clone https://github.com/xevrion/peek-a-repo.git
+   ```
+
+2. Open Chrome/Brave and go to:
+   `chrome://extensions` or
+   `brave://extensions`
+
+3. Enable **Developer mode** (top-right)
+
+4. Click **Load unpacked**
+
+5. Select the project folder
+
+6. Open extension options and add your GitHub Personal Access Token  
+   (required for code and folder previews)
+
+That’s it. Go to any GitHub repo and hover over files.
+
+---
+
+## Setup (for development)
+
+1. Install dependenies (only Tailwind is needed):
+
+   ```bash
+   npm install
+   ```
+
+2. Run Tailwind in watch mode:
+
+   ```bash
+   npx tailwindcss -i ./input.css -o ./tailwind.css --minify --watch
+   ```
+
+3. Make changes to the code
+
+4. Reload the extension from:
+   `chrome://extensions` or
+   `brave://extensions`
+
+---
+
 ## Why this exists
 
 This project started from a real problem I faced.  
 I couldn’t find an existing solution, so I built one.
 
 Simple as that.
-
-dev: `npx tailwindcss -i ./input.css -o ./tailwind.css --minify --watch` ~ run this while developing to watch for changes and compile the css
