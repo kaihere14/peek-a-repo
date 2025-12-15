@@ -7,6 +7,12 @@
       "default_popup": "popup/popup.html",
       "default_icon": "/icons/icon128.png"
     },
+    "icons": {
+      "128": "/icons/icon128.png",
+      "48": "/icons/icon48.png",
+      "32": "/icons/icon32.png",
+      "16": "/icons/icon16.png"
+    },
     "permissions": [
       "activeTab"
     ]
