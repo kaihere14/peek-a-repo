@@ -28,7 +28,7 @@
     {
       "matches": ["https://github.com/*"],
       "js": ["content.js"],
-      "css": ["styles.css"],
+      "css": ["tailwind.css"],
       "run_at": "document_idle"
     }
   ],
