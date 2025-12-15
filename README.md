@@ -44,6 +44,7 @@ and instantly see what’s inside?
 - No losing context
 
 Inspired by Wikipedia-style hover popups, Peek-a-Repo lets you _peek_ inside files before opening them.
+Worth reading the [Wikipedia article](https://wikimediafoundation.org/news/2018/04/20/why-it-took-a-long-time-to-build-that-tiny-link-preview-on-wikipedia/) where they explain why it took so long to build that tiny link preview on Wikipedia. It's cool to see how much effort went into making that tiny link preview on Wikipedia.
 
 ---
 
