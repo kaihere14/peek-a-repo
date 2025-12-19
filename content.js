@@ -5,31 +5,63 @@ const cache = new Map();
 let hoverTimer = null;
 let popup = null;
 let lastTarget = null;
+let isPopupShown = false;
 
 const ICONS = {
-  folder:`<svg aria-hidden="true" focusable="false" class="octicon octicon-file-directory-fill icon-directory" viewBox="0 0 16 16" width="16" height="16" fill="currentColor" display="inline-block" overflow="visible" style="vertical-align:text-bottom"><path d="M1.75 1A1.75 1.75 0 0 0 0 2.75v10.5C0 14.216.784 15 1.75 15h12.5A1.75 1.75 0 0 0 16 13.25v-8.5A1.75 1.75 0 0 0 14.25 3H7.5a.25.25 0 0 1-.2-.1l-.9-1.2C6.07 1.26 5.55 1 5 1H1.75Z"></path></svg>`,
-  file:`<svg aria-hidden="true" focusable="false" class="octicon octicon-file color-fg-muted" viewBox="0 0 16 16" width="16" height="16" fill="currentColor" display="inline-block" overflow="visible" style="vertical-align:text-bottom"><path d="M2 1.75C2 .784 2.784 0 3.75 0h6.586c.464 0 .909.184 1.237.513l2.914 2.914c.329.328.513.773.513 1.237v9.586A1.75 1.75 0 0 1 13.25 16h-9.5A1.75 1.75 0 0 1 2 14.25Zm1.75-.25a.25.25 0 0 0-.25.25v12.5c0 .138.112.25.25.25h9.5a.25.25 0 0 0 .25-.25V6h-2.75A1.75 1.75 0 0 1 9 4.25V1.5Zm6.75.062V4.25c0 .138.112.25.25.25h2.688l-.011-.013-2.914-2.914-.013-.011Z"></path></svg>`,
+  folder: `<svg aria-hidden="true" focusable="false" class="octicon octicon-file-directory-fill icon-directory" viewBox="0 0 16 16" width="16" height="16" fill="currentColor" display="inline-block" overflow="visible" style="vertical-align:text-bottom"><path d="M1.75 1A1.75 1.75 0 0 0 0 2.75v10.5C0 14.216.784 15 1.75 15h12.5A1.75 1.75 0 0 0 16 13.25v-8.5A1.75 1.75 0 0 0 14.25 3H7.5a.25.25 0 0 1-.2-.1l-.9-1.2C6.07 1.26 5.55 1 5 1H1.75Z"></path></svg>`,
+  file: `<svg aria-hidden="true" focusable="false" class="octicon octicon-file color-fg-muted" viewBox="0 0 16 16" width="16" height="16" fill="currentColor" display="inline-block" overflow="visible" style="vertical-align:text-bottom"><path d="M2 1.75C2 .784 2.784 0 3.75 0h6.586c.464 0 .909.184 1.237.513l2.914 2.914c.329.328.513.773.513 1.237v9.586A1.75 1.75 0 0 1 13.25 16h-9.5A1.75 1.75 0 0 1 2 14.25Zm1.75-.25a.25.25 0 0 0-.25.25v12.5c0 .138.112.25.25.25h9.5a.25.25 0 0 0 .25-.25V6h-2.75A1.75 1.75 0 0 1 9 4.25V1.5Zm6.75.062V4.25c0 .138.112.25.25.25h2.688l-.011-.013-2.914-2.914-.013-.011Z"></path></svg>`,
 };
+function lockBodyScroll() {
+  document.body.style.overflow = "hidden";
+}
+
+function unlockBodyScroll() {
+  document.body.style.overflow = "";
+}
 
 function createPopup() {
   popup = document.createElement("div");
 
   popup.className = `
     fixed z-[9999]
-    max-w-[90vw] max-h-[90vh]
-    p-3
     rounded-xl
     bg-[rgba(20,20,30,0.75)]
     backdrop-blur-md
     text-white text-xs
     shadow-2xl
-    overflow-hidden
-    pointer-events-none
+    pointer-events-auto
+    overflow-auto
     opacity-0 scale-[0.98] translate-y-1
     transition-all duration-150 ease-out
   `;
 
+  popup.style.minWidth = "0px";
+  popup.style.minHeight = "0px";
+  popup.style.maxWidth = "90vw";
+
   document.body.appendChild(popup);
+  lockBodyScroll();
+  isPopupShown = true;
+
+  popup.addEventListener("mouseenter", () => {
+    clearTimeout(hoverTimer);
+    isPopupShown = true;
+  });
+
+  popup.addEventListener("mouseleave", () => {
+    unlockBodyScroll();
+    destroyPopup();
+    lastTarget = null;
+  });
+
+  popup.addEventListener(
+    "wheel",
+    (e) => {
+      e.stopPropagation();
+      // Let the browser handle scrolling naturally, just prevent it from bubbling to body
+    },
+    { passive: false }
+  );
 }
 
 function destroyPopup() {
@@ -40,7 +72,8 @@ function destroyPopup() {
 
   const el = popup;
   popup = null;
-
+  isPopupShown = false;
+  unlockBodyScroll();
   setTimeout(() => {
     el.remove();
   }, 150); // must match transition duration
@@ -69,8 +102,37 @@ function buildRawUrl(href) {
 }
 
 function positionPopup(e) {
-  popup.style.top = `${e.clientY + 15}px`;
-  popup.style.left = `${e.clientX + 15}px`;
+  const offset = 15;
+  const padding = 20; // padding from screen edge
+
+  const viewportHeight = window.innerHeight;
+  const viewportWidth = window.innerWidth;
+
+  // Calculate available height from cursor to bottom of viewport
+  const availableHeight = viewportHeight - e.clientY - offset - padding;
+
+  // Set max-height based on available space
+  popup.style.maxHeight = `${Math.max(200, availableHeight)}px`;
+
+  let top = e.clientY + offset;
+  let left = e.clientX + offset;
+
+  // Set initial position
+  popup.style.top = `${top}px`;
+  popup.style.left = `${left}px`;
+
+  // Adjust position after render if needed
+  requestAnimationFrame(() => {
+    if (!popup) return;
+
+    const popupWidth = popup.offsetWidth;
+
+    // Adjust if popup goes beyond right edge
+    if (left + popupWidth > viewportWidth - padding) {
+      left = Math.max(padding, viewportWidth - popupWidth - padding);
+      popup.style.left = `${left}px`;
+    }
+  });
 }
 
 function highlightCode(code) {
@@ -142,7 +204,7 @@ async function handleHover(e, link) {
   }
 
   popup.innerHTML = `
-  <div class="w-full h-full flex items-center justify-center opacity-80">
+  <div class="w-full flex items-center justify-center opacity-80 p-3">
     Loading…
   </div>
 `;
@@ -151,8 +213,8 @@ async function handleHover(e, link) {
     const raw = buildRawUrl(href);
 
     popup.innerHTML = `
-    <div class="flex items-center justify-center">
-      <img id="peek-img" src="${raw}" class="rounded-lg" />
+    <div class="w-full flex items-center justify-center p-3">
+      <img id="peek-img" src="${raw}" class="rounded-lg max-w-full max-h-full object-contain" />
       </div>
     `;
 
@@ -160,25 +222,6 @@ async function handleHover(e, link) {
 
     img.onload = () => {
       if (!popup) return;
-
-      const w = img.naturalWidth;
-      const h = img.naturalHeight;
-      const area = w * h;
-
-      let scale = 1;
-      if (area > MAX_IMAGE_AREA) {
-        scale = Math.sqrt(MAX_IMAGE_AREA / area);
-      }
-
-      const displayW = Math.round(w * scale);
-      const displayH = Math.round(h * scale);
-
-      img.style.width = `${displayW}px`;
-      img.style.height = `${displayH}px`;
-
-      popup.style.width = `${displayW + 24}px`;
-      popup.style.height = `${displayH + 24}px`;
-
       cache.set(href, popup.innerHTML);
     };
     return;
@@ -191,7 +234,7 @@ async function handleHover(e, link) {
     const parts = new URL(href).pathname.split("/").filter(Boolean);
     const branch = parts[3];
     const path = parts.slice(4).join("/");
-  
+
     const res = await fetchViaBackground({
       type: "FETCH_FOLDER",
       owner,
@@ -199,9 +242,9 @@ async function handleHover(e, link) {
       branch,
       path,
     });
-  
+
     if (!popup) return;
-  
+
     if (res?.error === "NO_TOKEN") {
       popup.innerHTML = `
         <div class="p-3 opacity-80">
@@ -210,7 +253,7 @@ async function handleHover(e, link) {
       `;
       return;
     }
-  
+
     if (!res?.entries?.length) {
       popup.innerHTML = `
         <div class="p-3 opacity-60">
@@ -219,25 +262,27 @@ async function handleHover(e, link) {
       `;
       return;
     }
-  
+
     const rows = res.entries
       .slice(0, 25)
-      .map(entry => `
+      .map(
+        (entry) => `
         <div class="flex items-center gap-2 px-2 py-1 rounded hover:bg-white/10">
           <span class="opacity-80">
             ${entry.type === "tree" ? ICONS.folder : ICONS.file}
           </span>
           <span class="truncate">${entry.name}</span>
         </div>
-      `)
+      `
+      )
       .join("");
-  
+
     const html = `
-      <div class="flex flex-col gap-1 max-h-[320px] overflow-auto">
+      <div class="flex flex-col gap-1 p-3">
         ${rows}
       </div>
     `;
-  
+
     cache.set(href, html);
     popup.innerHTML = html;
     return;
@@ -276,7 +321,7 @@ async function handleHover(e, link) {
   const language = getPrismLanguage(path);
 
   const html = `
-  <div class="w-full h-full overflow-hidden">
+  <div class="w-full">
     <pre class="language-${language} text-[11px] leading-relaxed p-3">
 <code class="language-${language}">${escapeHtml(code)}</code>
     </pre>
@@ -317,19 +362,22 @@ document.addEventListener("mouseover", (e) => {
   }, HOVER_DELAY);
 });
 
-document.addEventListener("mousemove", (e) => {
-  if (popup) positionPopup(e);
-});
-
 // mouse out
 document.addEventListener("mouseout", (e) => {
-  if (
-    popup &&
-    !popup.contains(e.relatedTarget) &&
-    !e.relatedTarget?.closest?.('a[href*="/blob/"], a[href*="/tree/"]')
-  ) {
-    clearTimeout(hoverTimer);
-    destroyPopup();
-    lastTarget = null;
+  const link = e.target.closest('a[href*="/blob/"], a[href*="/tree/"]');
+
+  // Only destroy if leaving both the link and popup
+  if (link && link === lastTarget) {
+    const relatedIsPopup = popup && popup.contains(e.relatedTarget);
+    if (!relatedIsPopup) {
+      hoverTimer = setTimeout(() => {
+        if (!isPopupShown || (popup && !popup.matches(":hover"))) {
+          clearTimeout(hoverTimer);
+          unlockBodyScroll();
+          destroyPopup();
+          lastTarget = null;
+        }
+      }, 100);
+    }
   }
 });
