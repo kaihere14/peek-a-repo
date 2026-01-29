@@ -266,14 +266,20 @@ async function handleHover(e, link) {
     const rows = res.entries
       .slice(0, 25)
       .map(
-        (entry) => `
-        <div class="flex items-center gap-2 px-2 py-1 rounded hover:bg-white/10">
+        (entry) => {
+          const isFile = entry.type === "blob";
+          const className = isFile
+            ? "cursor-pointer hover:bg-white/20 transition-colors"
+            : "hover:bg-white/10";
+          return `
+        <div class="flex items-center gap-2 px-2 py-1 rounded ${className}" data-file="${isFile ? entry.name : ""}" data-type="${entry.type}">
           <span class="opacity-80">
             ${entry.type === "tree" ? ICONS.folder : ICONS.file}
           </span>
           <span class="truncate">${entry.name}</span>
         </div>
-      `
+      `;
+        }
       )
       .join("");
 
@@ -285,6 +291,19 @@ async function handleHover(e, link) {
 
     cache.set(href, html);
     popup.innerHTML = html;
+
+    // Add click handlers for files
+    popup.querySelectorAll("[data-type='blob']").forEach((fileElement) => {
+      fileElement.addEventListener("click", async (e) => {
+        e.stopPropagation();
+        const fileName = fileElement.getAttribute("data-file");
+        const currentPath = parts.slice(4).join("/");
+        const filePath = currentPath ? `${currentPath}/${fileName}` : fileName;
+
+        const fileUrl = `https://github.com/${owner}/${repo}/blob/${branch}/${filePath}`;
+        window.open(fileUrl, "_blank");
+      });
+    });
     return;
   }
 
