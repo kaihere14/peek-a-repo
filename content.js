@@ -11,6 +11,7 @@ let popup = null;
 let lastTarget = null;
 let isPopupShown = false;
 let nestedPopups = []; // Array to track all nested popups
+let loginNotificationShown = false; // Track if we've shown the login notification
 
 // Error messages
 const ERROR_MESSAGES = {
@@ -18,6 +19,140 @@ const ERROR_MESSAGES = {
   RATE_LIMIT: "API rate limit exceeded. Please wait a moment before trying again.",
   DEFAULT: "An error occurred. Please try again.",
 };
+
+// Check login status and show notification if needed
+async function checkAndNotifyLogin() {
+  if (loginNotificationShown) return;
+  
+  const result = await new Promise((resolve) => {
+    chrome.storage.sync.get("githubToken", resolve);
+  });
+  
+  if (!result.githubToken) {
+    showLoginNotification();
+    loginNotificationShown = true;
+  }
+}
+
+function showLoginNotification() {
+  // Create notification banner
+  const notification = document.createElement("div");
+  notification.id = "peek-a-repo-login-notification";
+  notification.innerHTML = `
+    <div style="
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 10000;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 16px 20px;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+      max-width: 400px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+      animation: slideInRight 0.3s ease-out;
+    ">
+      <div style="display: flex; align-items: start; gap: 12px;">
+        <div style="flex-shrink: 0; font-size: 24px;">🔍</div>
+        <div style="flex: 1;">
+          <div style="font-weight: 600; font-size: 14px; margin-bottom: 6px;">
+            Peek-a-Repo Extension Detected
+          </div>
+          <div style="font-size: 13px; line-height: 1.5; opacity: 0.95; margin-bottom: 12px;">
+            You have Peek-a-Repo enabled but haven't logged in yet. Sign in to start previewing files and folders on hover!
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button id="peek-login-btn" style="
+              background: white;
+              color: #667eea;
+              border: none;
+              padding: 8px 16px;
+              border-radius: 6px;
+              font-size: 13px;
+              font-weight: 600;
+              cursor: pointer;
+              transition: transform 0.2s;
+            ">
+              Sign In Now
+            </button>
+            <button id="peek-dismiss-btn" style="
+              background: rgba(255, 255, 255, 0.2);
+              color: white;
+              border: none;
+              padding: 8px 16px;
+              border-radius: 6px;
+              font-size: 13px;
+              font-weight: 500;
+              cursor: pointer;
+              transition: background 0.2s;
+            ">
+              Dismiss
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  // Add animation keyframes
+  const style = document.createElement("style");
+  style.textContent = `
+    @keyframes slideInRight {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    @keyframes slideOutRight {
+      from {
+        transform: translateX(0);
+        opacity: 1;
+      }
+      to {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+    }
+    #peek-login-btn:hover {
+      transform: scale(1.05);
+    }
+    #peek-dismiss-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+  `;
+  document.head.appendChild(style);
+  
+  document.body.appendChild(notification);
+  
+  // Add event listeners
+  document.getElementById("peek-login-btn").addEventListener("click", () => {
+    chrome.runtime.sendMessage({ type: "OPEN_OPTIONS" });
+    dismissNotification();
+  });
+  
+  document.getElementById("peek-dismiss-btn").addEventListener("click", () => {
+    dismissNotification();
+  });
+  
+  // Auto-dismiss after 10 seconds
+  setTimeout(dismissNotification, 10000);
+  
+  function dismissNotification() {
+    const notif = document.getElementById("peek-a-repo-login-notification");
+    if (notif) {
+      notif.firstElementChild.style.animation = "slideOutRight 0.3s ease-out";
+      setTimeout(() => notif.remove(), 300);
+    }
+  }
+}
+
+// Check login status when page loads
+checkAndNotifyLogin();
 
 const ICONS = {
   folder: `<svg aria-hidden="true" focusable="false" class="octicon octicon-file-directory-fill icon-directory" viewBox="0 0 16 16" width="16" height="16" fill="currentColor" display="inline-block" overflow="visible" style="vertical-align:text-bottom"><path d="M1.75 1A1.75 1.75 0 0 0 0 2.75v10.5C0 14.216.784 15 1.75 15h12.5A1.75 1.75 0 0 0 16 13.25v-8.5A1.75 1.75 0 0 0 14.25 3H7.5a.25.25 0 0 1-.2-.1l-.9-1.2C6.07 1.26 5.55 1 5 1H1.75Z"></path></svg>`,

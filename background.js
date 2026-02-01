@@ -1,4 +1,61 @@
 const GITHUB_API = "https://api.github.com/graphql";
+const GITHUB_CLIENT_ID = "Ov23li7jLGhcwdkrnVXS"; // Public client ID for OAuth
+
+// Check if user has token on install/update
+chrome.runtime.onInstalled.addListener(async (details) => {
+  if (details.reason === "install") {
+    const { githubToken } = await chrome.storage.sync.get("githubToken");
+    if (!githubToken) {
+      // Open options page for OAuth login
+      chrome.runtime.openOptionsPage();
+    }
+  }
+});
+
+// Handle OAuth flow
+async function initiateGitHubOAuth() {
+  const redirectURL = chrome.identity.getRedirectURL();
+  const clientId = GITHUB_CLIENT_ID;
+  const scopes = "read:user";
+  
+  const authURL = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectURL)}&scope=${encodeURIComponent(scopes)}`;
+  
+  return new Promise((resolve, reject) => {
+    chrome.identity.launchWebAuthFlow(
+      {
+        url: authURL,
+        interactive: true,
+      },
+      async (redirectUrl) => {
+        if (chrome.runtime.lastError) {
+          reject(chrome.runtime.lastError);
+          return;
+        }
+        
+        // Extract the code from the redirect URL
+        const url = new URL(redirectUrl);
+        const code = url.searchParams.get("code");
+        
+        if (code) {
+          try {
+            // Exchange code for token using GitHub's device flow as a workaround
+            // Since we can't directly exchange the code without a client secret in the extension
+            // We'll use GitHub's token directly from the auth flow
+            // Note: For production, you'd need a backend server to exchange the code
+            
+            // For now, we'll use a proxy service or direct token method
+            // This is a simplified version - you may need to set up a backend
+            resolve({ code });
+          } catch (error) {
+            reject(error);
+          }
+        } else {
+          reject(new Error("No code found in redirect URL"));
+        }
+      }
+    );
+  });
+}
 
 // Single unified message listener
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
@@ -14,6 +71,19 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 
   if (msg.type === "FETCH_PAGE") {
     fetchPage(msg).then(sendResponse);
+    return true;
+  }
+  
+  if (msg.type === "OAUTH_LOGIN") {
+    initiateGitHubOAuth()
+      .then((result) => sendResponse({ success: true, ...result }))
+      .catch((error) => sendResponse({ success: false, error: error.message }));
+    return true;
+  }
+  
+  if (msg.type === "OPEN_OPTIONS") {
+    chrome.runtime.openOptionsPage();
+    sendResponse({ success: true });
     return true;
   }
 });

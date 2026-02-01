@@ -9,6 +9,37 @@
         background: #0f172a;
         color: white;
         padding: 24px;
+        max-width: 600px;
+        margin: 0 auto;
+      }
+      .section {
+        margin-bottom: 32px;
+        padding: 20px;
+        background: #1e293b;
+        border-radius: 12px;
+      }
+      h2 {
+        margin-top: 0;
+      }
+      .oauth-section {
+        text-align: center;
+      }
+      .status {
+        padding: 12px;
+        border-radius: 8px;
+        margin-top: 12px;
+        display: none;
+      }
+      .status.success {
+        background: #166534;
+        border: 1px solid #22c55e;
+      }
+      .status.error {
+        background: #991b1b;
+        border: 1px solid #ef4444;
+      }
+      .status.show {
+        display: block;
       }
       input {
         width: 100%;
@@ -16,23 +47,127 @@
         border-radius: 8px;
         border: none;
         margin-top: 8px;
+        box-sizing: border-box;
       }
       button {
         margin-top: 12px;
-        padding: 10px 16px;
+        padding: 12px 24px;
         border-radius: 8px;
         border: none;
         background: #2563eb;
         color: white;
         cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+      }
+      button:hover {
+        background: #1d4ed8;
+      }
+      button:disabled {
+        background: #475569;
+        cursor: not-allowed;
+      }
+      .oauth-btn {
+        background: #24292e;
+        padding: 14px 32px;
+        font-size: 16px;
+      }
+      .oauth-btn:hover {
+        background: #2d333b;
+      }
+      .divider {
+        text-align: center;
+        margin: 24px 0;
+        color: #64748b;
+        position: relative;
+      }
+      .divider::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 50%;
+        width: 45%;
+        height: 1px;
+        background: #334155;
+      }
+      .divider::after {
+        content: "";
+        position: absolute;
+        right: 0;
+        top: 50%;
+        width: 45%;
+        height: 1px;
+        background: #334155;
+      }
+      .note {
+        font-size: 13px;
+        color: #94a3b8;
+        margin-top: 8px;
+      }
+      .logged-in {
+        background: #166534;
+        padding: 16px;
+        border-radius: 8px;
+        margin-bottom: 16px;
+      }
+      .logged-in h3 {
+        margin: 0 0 8px 0;
+        color: #22c55e;
+      }
+      .logout-btn {
+        background: #dc2626;
+        margin-top: 8px;
+      }
+      .logout-btn:hover {
+        background: #b91c1c;
       }
     </style>
   </head>
   <body>
-    <h2>Peek-a-Repo</h2>
-    <p>GitHub Personal Access Token</p>
-    <input id="token" type="password" placeholder="ghp_..." />
-    <button id="save">Save</button>
+    <h2>🔍 Peek-a-Repo Settings</h2>
+    
+    <div class="section oauth-section">
+      <div id="loggedInStatus" class="logged-in" style="display: none;">
+        <h3>✓ Connected to GitHub</h3>
+        <p style="margin: 4px 0; color: #86efac;">You're all set! The extension will work seamlessly.</p>
+        <button id="logout" class="logout-btn">Disconnect</button>
+      </div>
+      
+      <div id="loginSection">
+        <h3>Sign in with GitHub</h3>
+        <p class="note">Quick and easy - click below to authenticate with GitHub OAuth</p>
+        
+        <div style="text-align: left; margin: 16px 0; padding: 12px; background: #1e293b; border-radius: 8px; border: 1px solid #334155;">
+          <label style="display: flex; align-items: flex-start; cursor: pointer;">
+            <input type="checkbox" id="includePrivateRepos" style="width: auto; margin: 4px 8px 0 0; cursor: pointer;">
+            <div>
+              <strong style="color: #e2e8f0;">Include private repositories</strong>
+              <p class="note" style="margin: 4px 0 0 0;">
+                ⚠️ Enabling this will request <code style="background: #0f172a; padding: 2px 6px; border-radius: 4px;">repo</code> scope for full repository access.<br>
+                We only <strong>read</strong> your code for previews and never write or modify anything.<br>
+                Leave unchecked to only access public repositories with minimal permissions.
+              </p>
+            </div>
+          </label>
+        </div>
+        
+        <button id="oauthLogin" class="oauth-btn">
+          <svg style="display: inline-block; vertical-align: middle; margin-right: 8px;" height="20" width="20" viewBox="0 0 16 16" fill="currentColor">
+            <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
+          </svg>
+          Sign in with GitHub
+        </button>
+        <div id="oauthStatus" class="status"></div>
+      </div>
+      
+      <div class="divider">OR</div>
+      
+      <h3>Use Personal Access Token</h3>
+      <p class="note">For advanced users: <a href="https://github.com/settings/tokens" target="_blank" style="color: #3b82f6;">Generate a token</a> with 'repo' scope</p>
+      <input id="token" type="password" placeholder="ghp_..." />
+      <button id="save">Save Token</button>
+      <div id="tokenStatus" class="status"></div>
+    </div>
 
     <script src="options.js"></script>
   </body>
