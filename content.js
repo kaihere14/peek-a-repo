@@ -26,10 +26,11 @@ async function checkAndNotifyLogin() {
   if (loginNotificationShown) return;
   
   const result = await new Promise((resolve) => {
-    chrome.storage.sync.get("githubToken", resolve);
+    chrome.storage.sync.get(["githubToken", "dismissedLoginNotification"], resolve);
   });
   
-  if (!result.githubToken) {
+  // Don't show if user has dismissed it permanently or if they have a token
+  if (!result.githubToken && !result.dismissedLoginNotification) {
     showLoginNotification();
     loginNotificationShown = true;
   }
@@ -88,7 +89,7 @@ function showLoginNotification() {
               cursor: pointer;
               transition: background 0.2s;
             ">
-              Dismiss
+              Don't Show Again
             </button>
           </div>
         </div>
@@ -137,13 +138,15 @@ function showLoginNotification() {
   });
   
   document.getElementById("peek-dismiss-btn").addEventListener("click", () => {
-    dismissNotification();
+    dismissNotification(true); // Pass true to save the dismissal permanently
   });
   
-  // Auto-dismiss after 10 seconds
-  setTimeout(dismissNotification, 10000);
-  
-  function dismissNotification() {
+  function dismissNotification(saveDismissal = false) {
+    if (saveDismissal) {
+      // Save to storage that user doesn't want to see this again
+      chrome.storage.sync.set({ dismissedLoginNotification: true });
+    }
+    
     const notif = document.getElementById("peek-a-repo-login-notification");
     if (notif) {
       notif.firstElementChild.style.animation = "slideOutRight 0.3s ease-out";
