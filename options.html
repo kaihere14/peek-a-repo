@@ -4,169 +4,285 @@
     <meta charset="UTF-8" />
     <title>Peek-a-Repo Settings</title>
     <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      
       body {
-        font-family: system-ui;
-        background: #0f172a;
-        color: white;
-        padding: 24px;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+        background: #0d1117;
+        color: #e6edf3;
+        padding: 32px 24px;
+        min-height: 100vh;
+      }
+      
+      .container {
         max-width: 600px;
         margin: 0 auto;
       }
-      .section {
+      
+      h1 {
+        font-size: 24px;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #e6edf3;
+      }
+      
+      .subtitle {
+        font-size: 14px;
+        color: #7d8590;
         margin-bottom: 32px;
-        padding: 20px;
-        background: #1e293b;
-        border-radius: 12px;
       }
-      h2 {
-        margin-top: 0;
+      
+      .section {
+        background: rgba(20, 20, 30, 0.5);
+        border: 1px solid rgba(240, 246, 252, 0.1);
+        border-radius: 6px;
+        padding: 16px;
+        margin-bottom: 16px;
       }
-      .oauth-section {
-        text-align: center;
+      
+      .section-title {
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 12px;
+        color: #e6edf3;
       }
+      
       .status {
         padding: 12px;
-        border-radius: 8px;
+        border-radius: 6px;
         margin-top: 12px;
         display: none;
+        font-size: 13px;
       }
+      
       .status.success {
-        background: #166534;
-        border: 1px solid #22c55e;
+        background: rgba(46, 160, 67, 0.15);
+        border: 1px solid rgba(46, 160, 67, 0.4);
+        color: #3fb950;
       }
+      
       .status.error {
-        background: #991b1b;
-        border: 1px solid #ef4444;
+        background: rgba(248, 81, 73, 0.15);
+        border: 1px solid rgba(248, 81, 73, 0.4);
+        color: #f85149;
       }
+      
       .status.show {
         display: block;
       }
-      input {
-        width: 100%;
-        padding: 10px;
-        border-radius: 8px;
-        border: none;
-        margin-top: 8px;
-        box-sizing: border-box;
+      
+      .logged-in {
+        background: rgba(46, 160, 67, 0.15);
+        border: 1px solid rgba(46, 160, 67, 0.4);
+        padding: 16px;
+        border-radius: 6px;
+        margin-bottom: 16px;
       }
-      button {
-        margin-top: 12px;
-        padding: 12px 24px;
-        border-radius: 8px;
-        border: none;
-        background: #2563eb;
-        color: white;
-        cursor: pointer;
+      
+      .logged-in-title {
         font-size: 14px;
+        font-weight: 600;
+        color: #3fb950;
+        margin-bottom: 8px;
+      }
+      
+      .logged-in-text {
+        font-size: 13px;
+        color: #7d8590;
+        margin-bottom: 12px;
+      }
+      
+      input[type="password"] {
+        width: 100%;
+        padding: 8px 12px;
+        border-radius: 6px;
+        border: 1px solid rgba(240, 246, 252, 0.1);
+        background: #0d1117;
+        color: #e6edf3;
+        font-size: 13px;
+        margin-top: 8px;
+        font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+      }
+      
+      input[type="password"]:focus {
+        outline: none;
+        border-color: #1f6feb;
+        box-shadow: 0 0 0 3px rgba(31, 111, 235, 0.3);
+      }
+      
+      button {
+        padding: 5px 16px;
+        border-radius: 6px;
+        border: 1px solid rgba(240, 246, 252, 0.1);
+        background: rgba(240, 246, 252, 0.05);
+        color: #e6edf3;
+        cursor: pointer;
+        font-size: 13px;
         font-weight: 500;
+        transition: all 0.2s;
       }
+      
       button:hover {
-        background: #1d4ed8;
+        background: rgba(240, 246, 252, 0.1);
+        border-color: rgba(240, 246, 252, 0.2);
       }
+      
       button:disabled {
-        background: #475569;
+        opacity: 0.5;
         cursor: not-allowed;
       }
-      .oauth-btn {
-        background: #24292e;
-        padding: 14px 32px;
-        font-size: 16px;
+      
+      button:disabled:hover {
+        background: rgba(240, 246, 252, 0.05);
+        border-color: rgba(240, 246, 252, 0.1);
       }
-      .oauth-btn:hover {
-        background: #2d333b;
+      
+      .primary-btn {
+        background: #238636;
+        border-color: rgba(240, 246, 252, 0.1);
+        color: #ffffff;
       }
+      
+      .primary-btn:hover {
+        background: #2ea043;
+      }
+      
+      .danger-btn {
+        background: rgba(248, 81, 73, 0.15);
+        border-color: rgba(248, 81, 73, 0.4);
+        color: #f85149;
+      }
+      
+      .danger-btn:hover {
+        background: rgba(248, 81, 73, 0.25);
+      }
+      
+      .note {
+        font-size: 12px;
+        color: #7d8590;
+        margin-top: 8px;
+        line-height: 1.5;
+      }
+      
+      .note a {
+        color: #58a6ff;
+        text-decoration: none;
+      }
+      
+      .note a:hover {
+        text-decoration: underline;
+      }
+      
+      .checkbox-container {
+        background: rgba(240, 246, 252, 0.03);
+        border: 1px solid rgba(240, 246, 252, 0.1);
+        border-radius: 6px;
+        padding: 12px;
+        margin: 12px 0;
+      }
+      
+      .checkbox-label {
+        display: flex;
+        align-items: flex-start;
+        cursor: pointer;
+      }
+      
+      input[type="checkbox"] {
+        margin: 3px 10px 0 0;
+        cursor: pointer;
+        width: 16px;
+        height: 16px;
+      }
+      
+      .checkbox-content strong {
+        color: #e6edf3;
+        font-size: 13px;
+      }
+      
+      .checkbox-content .note {
+        margin-top: 4px;
+      }
+      
+      code {
+        background: rgba(110, 118, 129, 0.2);
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-size: 11px;
+        font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+      }
+      
       .divider {
         text-align: center;
         margin: 24px 0;
-        color: #64748b;
+        color: #7d8590;
+        font-size: 12px;
         position: relative;
       }
-      .divider::before {
-        content: "";
-        position: absolute;
-        left: 0;
-        top: 50%;
-        width: 45%;
-        height: 1px;
-        background: #334155;
-      }
+      
+      .divider::before,
       .divider::after {
         content: "";
         position: absolute;
-        right: 0;
         top: 50%;
         width: 45%;
         height: 1px;
-        background: #334155;
+        background: rgba(240, 246, 252, 0.1);
       }
-      .note {
-        font-size: 13px;
-        color: #94a3b8;
-        margin-top: 8px;
-      }
-      .logged-in {
-        background: #166534;
-        padding: 16px;
-        border-radius: 8px;
-        margin-bottom: 16px;
-      }
-      .logged-in h3 {
-        margin: 0 0 8px 0;
-        color: #22c55e;
-      }
-      .logout-btn {
-        background: #dc2626;
-        margin-top: 8px;
-      }
-      .logout-btn:hover {
-        background: #b91c1c;
-      }
+      
+      .divider::before { left: 0; }
+      .divider::after { right: 0; }
     </style>
   </head>
   <body>
-    <h2>🔍 Peek-a-Repo Settings</h2>
-    
-    <div class="section oauth-section">
+    <div class="container">
+      <h1>Peek-a-Repo Settings</h1>
+      <p class="subtitle">Configure authentication to preview files and folders on GitHub</p>
+      
       <div id="loggedInStatus" class="logged-in" style="display: none;">
-        <h3>✓ Connected to GitHub</h3>
-        <p style="margin: 4px 0; color: #86efac;">You're all set! The extension will work seamlessly.</p>
-        <button id="logout" class="logout-btn">Disconnect</button>
+        <div class="logged-in-title">✓ Connected to GitHub</div>
+        <p class="logged-in-text">You're all set! The extension is ready to use.</p>
+        <button id="logout" class="danger-btn">Sign out</button>
       </div>
       
       <div id="loginSection">
-        <h3>Sign in with GitHub</h3>
-        <p class="note">Quick and easy - click below to authenticate with GitHub OAuth</p>
-        
-        <div style="text-align: left; margin: 16px 0; padding: 12px; background: #1e293b; border-radius: 8px; border: 1px solid #334155;">
-          <label style="display: flex; align-items: flex-start; cursor: pointer;">
-            <input type="checkbox" id="includePrivateRepos" style="width: auto; margin: 4px 8px 0 0; cursor: pointer;">
-            <div>
-              <strong style="color: #e2e8f0;">Include private repositories</strong>
-              <p class="note" style="margin: 4px 0 0 0;">
-                ⚠️ Enabling this will request <code style="background: #0f172a; padding: 2px 6px; border-radius: 4px;">repo</code> scope for full repository access.<br>
-                We only <strong>read</strong> your code for previews and never write or modify anything.<br>
-                Leave unchecked to only access public repositories with minimal permissions.
-              </p>
-            </div>
-          </label>
+        <div class="section">
+          <div class="section-title">GitHub OAuth</div>
+          <p class="note">Recommended method for easy authentication</p>
+          
+          <div class="checkbox-container">
+            <label class="checkbox-label">
+              <input type="checkbox" id="includePrivateRepos">
+              <div class="checkbox-content">
+                <strong>Include private repositories</strong>
+                <p class="note">
+                  ⚠️ Requests <code>repo</code> scope for full repository access.<br>
+                  We only <strong>read</strong> your code for previews and never write or modify anything.<br>
+                  Leave unchecked for public repositories only (minimal permissions).
+                </p>
+              </div>
+            </label>
+          </div>
+          
+          <button id="oauthLogin" class="primary-btn" style="margin-top: 12px;">
+            Sign in with GitHub
+          </button>
+          <div id="oauthStatus" class="status"></div>
         </div>
-        
-        <button id="oauthLogin" class="oauth-btn">
-          <svg style="display: inline-block; vertical-align: middle; margin-right: 8px;" height="20" width="20" viewBox="0 0 16 16" fill="currentColor">
-            <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
-          </svg>
-          Sign in with GitHub
-        </button>
-        <div id="oauthStatus" class="status"></div>
       </div>
       
       <div class="divider">OR</div>
       
-      <h3>Use Personal Access Token</h3>
-      <p class="note">For advanced users: <a href="https://github.com/settings/tokens" target="_blank" style="color: #3b82f6;">Generate a token</a> with 'repo' scope</p>
-      <input id="token" type="password" placeholder="ghp_..." />
-      <button id="save">Save Token</button>
-      <div id="tokenStatus" class="status"></div>
+      <div class="section">
+        <div class="section-title">Personal Access Token</div>
+        <p class="note">For advanced users: <a href="https://github.com/settings/tokens" target="_blank">Generate a token</a> with <code>repo</code> scope</p>
+        <input id="token" type="password" placeholder="ghp_..." />
+        <button id="save" class="primary-btn" style="margin-top: 12px;">Save token</button>
+        <div id="tokenStatus" class="status"></div>
+      </div>
     </div>
 
     <script src="options.js"></script>

@@ -43,53 +43,55 @@ function showLoginNotification() {
   notification.innerHTML = `
     <div style="
       position: fixed;
-      top: 20px;
-      right: 20px;
+      top: 16px;
+      right: 16px;
       z-index: 10000;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      padding: 16px 20px;
-      border-radius: 12px;
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-      max-width: 400px;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
-      animation: slideInRight 0.3s ease-out;
+      background: rgba(20, 20, 30, 0.95);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      color: #e6edf3;
+      padding: 16px;
+      border-radius: 8px;
+      border: 1px solid rgba(240, 246, 252, 0.1);
+      box-shadow: 0 8px 24px rgba(1, 4, 9, 0.8);
+      max-width: 360px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+      animation: slideInRight 0.2s ease-out;
     ">
-      <div style="display: flex; align-items: start; gap: 12px;">
-        <div style="flex-shrink: 0; font-size: 24px;">🔍</div>
+      <div style="display: flex; gap: 12px;">
         <div style="flex: 1;">
-          <div style="font-weight: 600; font-size: 14px; margin-bottom: 6px;">
-            Peek-a-Repo Extension Detected
+          <div style="font-weight: 600; font-size: 14px; margin-bottom: 8px; color: #e6edf3;">
+            Authentication Required
           </div>
-          <div style="font-size: 13px; line-height: 1.5; opacity: 0.95; margin-bottom: 12px;">
-            You have Peek-a-Repo enabled but haven't logged in yet. Sign in to start previewing files and folders on hover!
+          <div style="font-size: 12px; line-height: 1.5; color: #7d8590; margin-bottom: 12px;">
+            Sign in to preview files and folders on hover
           </div>
           <div style="display: flex; gap: 8px;">
             <button id="peek-login-btn" style="
-              background: white;
-              color: #667eea;
+              background: #238636;
+              color: #ffffff;
               border: none;
-              padding: 8px 16px;
+              padding: 5px 12px;
               border-radius: 6px;
-              font-size: 13px;
-              font-weight: 600;
-              cursor: pointer;
-              transition: transform 0.2s;
-            ">
-              Sign In Now
-            </button>
-            <button id="peek-dismiss-btn" style="
-              background: rgba(255, 255, 255, 0.2);
-              color: white;
-              border: none;
-              padding: 8px 16px;
-              border-radius: 6px;
-              font-size: 13px;
+              font-size: 12px;
               font-weight: 500;
               cursor: pointer;
               transition: background 0.2s;
             ">
-              Don't Show Again
+              Sign in
+            </button>
+            <button id="peek-dismiss-btn" style="
+              background: transparent;
+              color: #7d8590;
+              border: 1px solid rgba(240, 246, 252, 0.1);
+              padding: 5px 12px;
+              border-radius: 6px;
+              font-size: 12px;
+              font-weight: 500;
+              cursor: pointer;
+              transition: all 0.2s;
+            ">
+              Don't show again
             </button>
           </div>
         </div>
@@ -102,7 +104,7 @@ function showLoginNotification() {
   style.textContent = `
     @keyframes slideInRight {
       from {
-        transform: translateX(400px);
+        transform: translateX(20px);
         opacity: 0;
       }
       to {
@@ -116,15 +118,16 @@ function showLoginNotification() {
         opacity: 1;
       }
       to {
-        transform: translateX(400px);
+        transform: translateX(20px);
         opacity: 0;
       }
     }
     #peek-login-btn:hover {
-      transform: scale(1.05);
+      background: #2ea043;
     }
     #peek-dismiss-btn:hover {
-      background: rgba(255, 255, 255, 0.3);
+      background: rgba(240, 246, 252, 0.1);
+      border-color: rgba(240, 246, 252, 0.2);
     }
   `;
   document.head.appendChild(style);
